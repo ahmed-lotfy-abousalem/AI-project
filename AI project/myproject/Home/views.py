@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
-from .forms import AddToCartForm
-from .models import CartItem
+from .forms import AddToCartForm,RatingForm
+from .models import CartItem,Rating
 from django.shortcuts import HttpResponse
 from .database_operations import fetch_data_from_database
 from django.contrib.auth.forms import UserCreationForm
@@ -12,21 +12,32 @@ def home(request):
     if request.method == 'POST':
         form = AddToCartForm(request.POST)
         if form.is_valid():
-            # Get the current logged-in user
-            user = request.user
-
             # Extract form data
             product_name = form.cleaned_data['product_name']
             price = form.cleaned_data['price']
             quantity = form.cleaned_data['quantity']
+            rating = int(request.POST.get('rating', 0))  # Get the rating value from the POST data
 
-            # Create a new CartItem object with the user and save it to the database
-            CartItem.objects.create(user=user, product_name=product_name, price=price, quantity=quantity)
+            # Create a new CartItem object with the user, product details, and rating
+            CartItem.objects.create(
+                user=request.user,
+                product_name=product_name,
+                price=price,
+                quantity=quantity
+            )
 
-            # Redirect to cart page or any other page
+            # Create a new Rating object and save it to the database
+            Rating.objects.create(
+                user=request.user,
+                product_name=product_name,
+                rating=rating
+            )
+
+            # Redirect to home page after adding to cart and rating
             return redirect('home')
     else:
         form = AddToCartForm()
+
     return render(request, 'index.html', {'form': form})
 
 def my_view(request):

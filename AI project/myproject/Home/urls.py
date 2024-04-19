@@ -7,5 +7,6 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
 
 
+
     # Add more URL patterns as needed
 ]
