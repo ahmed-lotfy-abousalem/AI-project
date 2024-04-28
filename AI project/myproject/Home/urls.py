@@ -7,6 +7,7 @@ urlpatterns = [
     path('login/', views.user_login, name='login'),
     path('chatbot/', views.chatbot , name='chatbot'),
     
+    
 
 
 

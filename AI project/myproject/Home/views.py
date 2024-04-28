@@ -42,12 +42,11 @@ def home(request):
     else:
         form = AddToCartForm()
 
-    return render(request, 'index.html', {'form': form})
-
-def index(request):
-    products = Product.objects.all()  # Fetch all products from the database
-    context = {'products': products}
+    # Fetch all products from the database
+    products = Product.objects.all()
+    context = {'products': products, 'form': form}
     return render(request, 'index.html', context)
+
 
 def chatbot(request):
     if request.method == 'POST':
