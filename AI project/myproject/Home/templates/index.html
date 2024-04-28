@@ -898,6 +898,51 @@
     </section>
     <!-- end of newsletter -->
 
+    <div id="chatbot-container" style="display: none;">
+    <div id="chat-container"></div>
+    <input type="text" id="user-input">
+    <button onclick="sendMessage()">Send</button>
+</div>
+<div id="chatbot-icon" style="position: fixed; bottom: 20px; right: 20px; cursor: pointer;">
+    <img src="{% static 'images/chatbot.png' %}" alt="Chatbot Icon" style="width: 30px; height: 30px;">
+</div>
+
+<script>
+    function sendMessage() {
+        var userInput = document.getElementById('user-input').value;
+        var csrfToken = getCSRFToken();
+
+        fetch('/chatbot/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: 'message=' + encodeURIComponent(userInput)
+        })
+        .then(response => response.json())
+        .then(data => {
+            var chatContainer = document.getElementById('chat-container');
+            chatContainer.innerHTML += '<p>User: ' + userInput + '</p>';
+            chatContainer.innerHTML += '<p>Chatbot: ' + data.response + '</p>';
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to get CSRF token
+    function getCSRFToken() {
+        return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    }
+
+    // Add event listener to chatbot icon
+    var chatIcon = document.getElementById('chatbot-icon');
+    chatIcon.addEventListener('click', function() {
+        var chatContainer = document.getElementById('chatbot-container');
+        chatContainer.style.display = 'block'; // Show the chatbot container
+        console.log('Chat opened'); // Check if this message appears in the console
+    });
+</script>
+
     <!-- footer -->
     <footer class = "bg-dark py-5">
         <div class = "container">

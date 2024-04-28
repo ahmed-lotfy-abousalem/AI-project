@@ -6,6 +6,10 @@ from .database_operations import fetch_data_from_database
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from .forms import SignupForm , LoginForm
+from django.http import JsonResponse
+from .models import Rating, CartItem,Product
+
+
 
 
 def home(request):
@@ -40,6 +44,40 @@ def home(request):
 
     return render(request, 'index.html', {'form': form})
 
+def index(request):
+    products = Product.objects.all()  # Fetch all products from the database
+    context = {'products': products}
+    return render(request, 'index.html', context)
+
+def chatbot(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        user = request.user  # Assuming user is authenticated
+
+        # Implement collaborative filtering to recommend products
+        recommended_products = get_recommended_products(user)
+
+        return JsonResponse({'response': 'Recommended Products:', 'products': recommended_products})
+    return JsonResponse({'error': 'Invalid request'})
+
+def get_recommended_products(user):
+    # Get user's ratings and cart items
+    user_ratings = Rating.objects.filter(user=user)
+    user_cart_items = CartItem.objects.filter(user=user)
+
+    # Implement collaborative filtering logic to recommend products
+    # This is a simplified example; you may need more sophisticated algorithms
+    recommended_products = []
+    for rating in user_ratings:
+        if rating.rating >= 4:  # Assuming products rated 4 or above are recommended
+            recommended_products.append(rating.product_name)
+    
+    # Add cart items to recommendations
+    for cart_item in user_cart_items:
+        if cart_item.product_name not in recommended_products:
+            recommended_products.append(cart_item.product_name)
+
+    return recommended_products
 def my_view(request):
     # Your view logic here
 
@@ -74,3 +112,4 @@ def user_login(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
+
