@@ -8,6 +8,8 @@ from django.contrib.auth import login, authenticate
 from .forms import SignupForm , LoginForm
 from django.http import JsonResponse
 from .models import Rating, CartItem,Product
+from django.db.models import Count
+
 
 
 
@@ -48,35 +50,55 @@ def home(request):
     return render(request, 'index.html', context)
 
 
+
 def chatbot(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         user = request.user  # Assuming user is authenticated
 
-        # Implement collaborative filtering to recommend products
-        recommended_products = get_recommended_products(user)
+        if user.is_authenticated:
+            # Get recommended products for the user
+            recommended_products = get_recommended_products(user)
 
-        return JsonResponse({'response': 'Recommended Products:', 'products': recommended_products})
-    return JsonResponse({'error': 'Invalid request'})
+            # Format the recommended products for the JSON response
+            products_data = [{'name': product.product_name, 'rating': product.rating} for product in recommended_products]
+
+            response_data = {
+                'response': 'Recommended Products:',
+                'products': products_data
+            }
+            return JsonResponse(response_data)
+        else:
+            return JsonResponse({'error': 'User not authenticated.'}, status=401)  # Unauthorized
+    return JsonResponse({'error': 'Invalid request'}, status=400) 
 
 def get_recommended_products(user):
-    # Get user's ratings and cart items
-    user_ratings = Rating.objects.filter(user=user)
-    user_cart_items = CartItem.objects.filter(user=user)
-
-    # Implement collaborative filtering logic to recommend products
-    # This is a simplified example; you may need more sophisticated algorithms
-    recommended_products = []
-    for rating in user_ratings:
-        if rating.rating >= 4:  # Assuming products rated 4 or above are recommended
-            recommended_products.append(rating.product_name)
+    # Get all users who have rated at least one product
+    rated_users = Rating.objects.exclude(user=user).values('user').annotate(num_ratings=Count('id'))
     
-    # Add cart items to recommendations
-    for cart_item in user_cart_items:
-        if cart_item.product_name not in recommended_products:
-            recommended_products.append(cart_item.product_name)
-
+    # Calculate user-user similarity based on ratings
+    similarity_scores = {}
+    user_ratings = Rating.objects.filter(user=user)  # Fetch user's ratings
+    for rated_user in rated_users:
+        other_user = rated_user['user']
+        other_user_ratings = Rating.objects.filter(user=other_user)
+        
+        # Calculate similarity score using a simple metric like Jaccard similarity
+        common_ratings = set(user_ratings.values_list('product_name', flat=True))
+        other_common_ratings = set(other_user_ratings.values_list('product_name', flat=True))
+        
+        similarity = len(common_ratings.intersection(other_common_ratings)) / len(common_ratings.union(other_common_ratings))
+        similarity_scores[other_user] = similarity
+    
+    # Sort users by similarity score in descending order
+    similar_users = sorted(similarity_scores.items(), key=lambda x: x[1], reverse=True)
+    
+    # Get top similar users and their rated products
+    top_similar_users = [user_id for user_id, _ in similar_users[:3]]  # Adjust the number of similar users as needed
+    recommended_products = Rating.objects.filter(user__in=top_similar_users).order_by('-rating')[:5]  # Get top rated products from similar users
+    
     return recommended_products
+
 def my_view(request):
     # Your view logic here
 
