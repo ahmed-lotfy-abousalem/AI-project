@@ -13,6 +13,43 @@ body{
 .bg-primary{
     background-color: var(--pink)!important;
 }
+#chatbot-icon {
+    overflow: hidden; /* Prevent text bar from overflowing container */
+  }
+  
+  #text-bar {
+    position: absolute; /* Position text bar relative to icon */
+    top: 100%; /* Position text bar below the icon */
+    left: 0;
+    width: 200px; /* Adjust width as needed */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    opacity: 0; /* Initially hide text bar */
+    transition: opacity 0.3s ease-in-out; /* Smooth opacity transition */
+  }
+  
+  #chatbot-icon:hover #text-bar {
+    opacity: 1; /* Show text bar on hover */
+  }
+  
+  /* Additional styling for text bar elements (optional) */
+  #user-input {
+    width: 100%;
+    border: none;
+    font-size: 16px;
+  }
+  
+  #chatbot-icon button {
+    background-color: #007bff; /* Adjust button color */
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
 
 .btn:not(.nav-btns button){
     background-color: #fff;

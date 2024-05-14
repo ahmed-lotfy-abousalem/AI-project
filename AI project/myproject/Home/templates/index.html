@@ -494,13 +494,19 @@
     <!-- end of newsletter -->
 
     <div id="chatbot-container" style="display: none;">
-    <div id="chat-container"></div>
-    <input type="text" id="user-input">
-    <button onclick="sendMessage()">Send</button>
-</div>
-<div id="chatbot-icon" style="position: fixed; bottom: 20px; right: 20px; cursor: pointer;">
-    <img src="{% static 'images/chatbot.png' %}" alt="Chatbot Icon" style="width: 30px; height: 30px;">
-</div>
+        <div id="chat-container"></div>
+        <input type="text" id="user-input">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+      
+      <div id="chatbot-icon" style="position: fixed; bottom: 20px; right: 20px;">
+        <img src="{% static 'images/chatbot.png' %}" alt="Chatbot Icon" style="width: 30px; height: 30px;">
+      
+        <div id="text-bar">
+          <input type="text" id="user-input" placeholder="Type your message...">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
 
 <script>
     function sendMessage() {
